@@ -1,26 +1,24 @@
 const request = require("request");
 const fs = require("fs");
 
-// accept user input from the terminal, but slice (remove) first two elements when returning
-const userInput = process.argv[2];
-//console.log("Search term: ", userInput);
-
 // Write the logic in breedFetcher.js to fetch the Siberian data from the API endpoint using request.
 // https://api.thecatapi.com/v1/breeds/search?breed_ids={userInput}
 
-const fetchBreedDescription = function (breed, callback) {
-  let URL = `https://api.theecatapi.com/v1/breeds/search?q=${userInput}`;
+// fetchBreedDescription("Siberian", (error, description) => {});
+
+const fetchBreedDescription = function (breedName, callback) {
+  let URL = `https://api.thecatapi.com/v1/breeds/search?q=${breedName}`;
 
   // this is the start of the request
   request(URL, function (error, response, body) {
     // try to handle the errors + edge cases first?
     if (error) {
-      console.log("Error encounted, sorry!\n", error);
-      return;
+      callback("Error encounted, sorry!\n", error); // this line should use callbacks
+      //return;
     }
-    if (!userInput) {
-      console.log("Search term undefined.");
-      return;
+    if (!breedName) {
+      callback("Search term undefined."); // this line should use callbacks
+      //return;
     }
     // execute main request - status code 200 is all good!
     if (response && response.statusCode === 200) {
@@ -29,12 +27,18 @@ const fetchBreedDescription = function (breed, callback) {
 
       if (!data[0]) {
         // if breed not found, return appropriate message
-        console.log("Breed not found.");
-        return;
+        callback("Breed not found.", null); // this line should use callbacks
+        //return;
+      } else {
+        callback(null, data[0].description); // this line should use callbacks
+        console.log(typeof body);
       }
-      console.log("data type: ", data[0].description);
-      console.log(typeof body);
     }
   });
 };
-fetchBreedDescription("breed", "callback");
+
+fetchBreedDescription("breed", (err, description) => {
+  console.log(err, description);
+});
+
+module.exports = { fetchBreedDescription }; // I added this for the refactoring
